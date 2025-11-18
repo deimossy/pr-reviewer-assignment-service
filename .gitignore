@@ -43,4 +43,10 @@ go.work.sum
 # goose binary
 pkg/bin
 
+# oapi-codegen
+bin
+
+# oapi-codegen gen types.gen.go
+internal/dto/gen
+
 lefthook.yaml
