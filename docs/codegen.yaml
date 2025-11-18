@@ -1,0 +1,7 @@
+# docs/codegen.yaml
+package: "gen"
+generate:
+  types: true
+  chi-server: false
+  client: false
+  server: false
