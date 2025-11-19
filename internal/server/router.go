@@ -17,5 +17,6 @@ func NewRouter(userHandler *handlers.UserHandler, teamHandler *handlers.TeamHand
 	mux.HandleFunc("/pullRequest/create", prHandler.CreatePR)
 	mux.HandleFunc("/pullRequest/merge", prHandler.MergePR)
 	mux.HandleFunc("/pullRequest/reassign", prHandler.ReassignReview)
+	mux.HandleFunc("/pullRequest/stats", prHandler.GetStats)
 	return mux
 }
