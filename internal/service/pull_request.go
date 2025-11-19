@@ -16,6 +16,7 @@ type PullRequestService interface {
 	Merge(ctx context.Context, prID string) (*models.PullRequest, error)
 	ListByUser(ctx context.Context, userID string) ([]models.PullRequestShort, error)
 	ReplaceReview(ctx context.Context, prID, oldReviewerID string) (string, *models.PullRequest, error)
+	Stats(ctx context.Context) (map[string]int, error)
 }
 
 type pullRequestService struct {
@@ -116,6 +117,17 @@ func (s *pullRequestService) ReplaceReview(ctx context.Context, prID, oldReviewe
 		return "", nil, err
 	}
 	return newReviewerID, pr, nil
+}
+
+func (s *pullRequestService) Stats(ctx context.Context) (map[string]int, error) {
+	stats, err := s.repo.GetAssignmentsCount(ctx)
+	if err != nil {
+		s.logger.Error("failed to get PR stats",
+			zap.Error(err),
+		)
+		return nil, err
+	}
+	return stats, nil
 }
 
 func (s *pullRequestService) getPRForReplacement(ctx context.Context, prID string) (*models.PullRequest, error) {
