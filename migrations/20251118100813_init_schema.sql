@@ -17,7 +17,7 @@ CREATE TABLE pull_requests (
     pull_request_name TEXT NOT NULL,
     author_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     status TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at TIMESTAMPTZ,
     merged_at TIMESTAMPTZ
 );
 
