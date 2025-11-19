@@ -40,4 +40,10 @@ const (
 	FROM pull_request_reviewers
 	WHERE pull_request_id = $1;
 	`
+
+	getAssignmentsCountQuery = `
+	SELECT reviewer_id, COUNT(*) as count
+    FROM pull_request_reviewers
+    GROUP BY reviewer_id;
+	`
 )
