@@ -123,3 +123,21 @@ func (r *pullRequestRepository) GetReviewers(ctx context.Context, prID string) (
 	}
 	return reviewers, nil
 }
+
+func (r *pullRequestRepository) GetAssignmentsCount(ctx context.Context) (map[string]int, error) {
+	type reviewerAssignment struct {
+		ReviewerID string `db:"reviewer_id"`
+		Count      int    `db:"count"`
+	}
+
+	var assignments []reviewerAssignment
+	if err := r.db.SelectContext(ctx, &assignments, getAssignmentsCountQuery); err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]int, len(assignments))
+	for _, a := range assignments {
+		result[a.ReviewerID] = a.Count
+	}
+	return result, nil
+}
