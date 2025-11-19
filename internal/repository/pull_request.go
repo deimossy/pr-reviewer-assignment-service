@@ -13,4 +13,5 @@ type PullRequestRepository interface {
 
 	ReplaceReview(ctx context.Context, prID string, oldReviewerID string, newReviewerID string) error
 	GetReviewers(ctx context.Context, prID string) ([]string, error)
+	GetAssignmentsCount(ctx context.Context) (map[string]int, error)
 }
