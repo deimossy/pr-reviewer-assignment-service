@@ -117,3 +117,21 @@ func (h *PullRequestHandler) ReassignReview(w http.ResponseWriter, r *http.Reque
 	}
 	SendJSON(w, http.StatusOK, resp)
 }
+
+func (h *PullRequestHandler) GetStats(w http.ResponseWriter, r *http.Request) {
+	stats, err := h.PRService.Stats(r.Context())
+	if err != nil {
+		SendError(w, http.StatusInternalServerError, "INTERNAL", "failed to get stats")
+		return
+	}
+
+	if len(stats) == 0 {
+		SendError(w, http.StatusNotFound, "NOT_FOUND", "no pull request assignments found")
+		return
+	}
+
+	resp := map[string]interface{}{
+		"assignments_count": stats,
+	}
+	SendJSON(w, http.StatusOK, resp)
+}
