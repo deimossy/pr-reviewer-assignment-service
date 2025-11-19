@@ -17,6 +17,5 @@ func New() *zap.Logger {
 	if err != nil {
 		log.Fatalf("failed to initialize logger: %v", err)
 	}
-
 	return logger
 }
