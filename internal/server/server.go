@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"github.com/deimossy/pr-reviewer-assignment-service/internal/config"
 	"go.uber.org/zap"
 	"net/http"
@@ -17,11 +18,12 @@ type Server struct {
 
 func NewServer(cfg *config.Config, router http.Handler, logg *zap.Logger) *Server {
 	srv := &http.Server{
-		Addr:         cfg.ServerPort,
-		Handler:      router,
-		ReadTimeout:  cfg.ServerReadTimeout,
-		WriteTimeout: cfg.ServerWriteTimeout,
-		IdleTimeout:  cfg.ServerIdleTimeout,
+		Addr:              ":" + cfg.ServerPort,
+		Handler:           router,
+		ReadTimeout:       cfg.ServerReadTimeout,
+		WriteTimeout:      cfg.ServerWriteTimeout,
+		IdleTimeout:       cfg.ServerIdleTimeout,
+		ReadHeaderTimeout: cfg.ServerReadHeaderTimeout,
 	}
 
 	return &Server{
@@ -37,7 +39,7 @@ func (s *Server) Run(ctx context.Context) error {
 
 	errc := make(chan error, 1)
 	go func() {
-		if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := s.srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errc <- err
 		} else {
 			errc <- nil
