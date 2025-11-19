@@ -61,3 +61,19 @@ func TestPullRequestService_ReplaceReview(t *testing.T) {
 	assert.Equal(t, newReviewer, id)
 	assert.Equal(t, pr, result)
 }
+
+func TestPullRequestService_Stats(t *testing.T) {
+	mockPR := mocks.NewMockPullRequestService(t)
+	ctx := context.Background()
+
+	expectedStats := map[string]int{
+		"open":   5,
+		"closed": 3,
+	}
+
+	mockPR.EXPECT().Stats(ctx).Return(expectedStats, nil)
+
+	stats, err := mockPR.Stats(ctx)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedStats, stats)
+}
