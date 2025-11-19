@@ -9,13 +9,12 @@ func PullRequestToDTO(m *models.PullRequest) *dto.PullRequestDTO {
 	if m == nil {
 		return nil
 	}
-
 	return &dto.PullRequestDTO{
 		PullRequestID:     m.PullRequestId,
 		PullRequestName:   m.PullRequestName,
 		AuthorID:          m.AuthorId,
 		Status:            m.Status,
-		CreatedAt:         &m.CreatedAt,
+		CreatedAt:         m.CreatedAt,
 		MergedAt:          m.MergedAt,
 		AssignedReviewers: m.AssignedReviewers,
 	}
