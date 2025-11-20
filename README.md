@@ -26,83 +26,31 @@
 
 # 📂 **Структура проекта**
 
-```text
-.
-├── cmd/
-│   └── main.go              # Точка входа: инициализация сервиса и запуск HTTP-сервера
-│
-├── docker-compose.yaml      # Полное окружение: сервис + PostgreSQL
-├── Dockerfile               # Сборка приложения
-│
-├── docs/
-│   ├── openapi.yaml         # OpenAPI-спецификация API
-│   └── codegen.yaml         # Настройки для oapi-codegen (использовалось для генерации DTO)
-│
-├── internal/                # Основная бизнес-логика приложения
-│   ├── config/              # Загрузка конфигурации
-│   │   └── config.go
-│   │
-│   ├── dto/                 # DTO — структуры запросов и ответов API
-│   │   ├── error_response.go
-│   │   ├── user.go
-│   │   ├── team.go
-│   │   ├── team_member.go
-│   │   ├── pull_request.go
-│   │   └── pull_request_short.go
-│   │
-│   ├── handlers/            # HTTP-ручки (контроллеры)
-│   │   ├── user.go
-│   │   ├── team.go
-│   │   ├── pull_request.go
-│   │   └── response.go
-│   │
-│   ├── mapper/              # Преобразование DTO ⇄ Models
-│   │   ├── dto_from_models.go
-│   │   └── models_from_dto.go
-│   │
-│   ├── models/              # Бизнес-сущности
-│   │   ├── user.go
-│   │   ├── team.go
-│   │   ├── team_member.go
-│   │   ├── pull_request.go
-│   │   └── pull_request_short.go
-│   │
-│   ├── repository/          # Доступ к данным
-│   │   ├── postgres/        # SQL-репозитории
-│   │   │   ├── user/
-│   │   │   ├── team/
-│   │   │   └── pull_request/
-│   │   ├── user.go          # Интерфейсы
-│   │   ├── team.go
-│   │   └── pull_request.go
-│   │
-│   ├── server/              # HTTP-сервер + маршрутизация
-│   │   ├── router.go
-│   │   └── server.go
-│   │
-│   └── service/             # Бизнес-логика (координация работы между слоями)
-│       ├── user.go
-│       ├── team.go
-│       └── pull_request.go
-│
-├── migrations/              # SQL-миграции (исполняются при docker-compose up)
-│   └── 20251118100813_init_schema.sql
-│
-├── pkg/                     # Переиспользуемые утилиты
-│   ├── logger/              # Обёртка над zap
-│   ├── postgres/            # Построение подключения + хелперы
-│   └── errors/              # Типизированные ошибки
-│
-├── scripts/
-│   └── wait_for_postgres.sh # Скрипт ожидания запуска Postgres
-│
-├── tools/
-│   └── goose/               # Docker-обёртка для миграций
-│
-├── Makefile                 # Команды сборки/запуска
-├── LICENSE
-└── README.md
 ```
+├── cmd/                     # Точка входа: запуск сервиса
+├── docker-compose.yaml      # Полное окружение: сервис + PostgreSQL + goose
+├── Dockerfile               # Сборка приложения в Docker
+├── docs/                    # Настройки генератора DTO (oapi-codegen) + OpenAPI-спецификация API
+├── internal/                # Основная логика
+│   ├── config/              # Конфигурация
+│   ├── dto/                 # DTO: структуры запросов/ответов
+│   ├── handlers/            # HTTP-ручки
+│   ├── mapper/              # Конвертация DTO ↔ Models
+│   ├── models/              # Бизнес-сущности
+│   ├── repository/          # Доступ к данным
+│   │   └── postgres/        # SQL-репозитории
+│   ├── server/              # HTTP-сервер и маршрутизация
+│   └── service/             # Бизнес-логика
+│       └── mocks/           # Моки для юнит-тестов (mockery)
+├── migrations/              # SQL-миграции
+├── pkg/                     # Вспомогательные пакеты
+│   ├── errors/              # Типизированные ошибки
+│   ├── logger/              # Обёртка над zap, инициализация логгера
+│   └── postgres/            # Хелперы + подключение к БД
+├── scripts/                 # Скрипт для ожидания подключения к БД
+└── tools/                   # Скрипт + Dockerfile для goose
+```
+
 ---
 
 # ⚙️ **Требования**
@@ -151,16 +99,21 @@ make down
 
 #  **Команды Makefile**
 
-| Команда        | Описание                                           |
-| -------------- | -------------------------------------------------- |
-| `make up`      | Запустить сервис + БД                              |
-| `make logs`    | Смотреть логи                                      |
-| `make logger`  | Запуск логгера                                     |
-| `make build`   | Пересобрать docker-образы                          |
-| `make down`    | Остановить и удалить контейнеры                    |
-| `make clean`   | Полная очистка окружения                           |
-| `make test`    | Запуск тестов                                      |
-| `make codegen` | Генерация DTO (не используется в финальной сборке) |
+| Команда                    | Описание                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| `make up`                  | Запустить сервис и PostgreSQL в Docker                                         |
+| `make down`                | Остановить и удалить контейнеры                                                |
+| `make logs`                | Смотреть логи всех сервисов                                                    |
+| `make logger`              | Смотреть логи только сервиса `pr_reviewer_assignment_service`                  |
+| `make build`               | Пересобрать Docker-образы                                                      |
+| `make clean`               | Полная очистка окружения (`docker compose down -v`)                            |
+| `make test`                | Запуск юнит-тестов                                                             |
+| `make bench`               | Запуск нагрузочного тестирования (если реализовано)                            |
+| `make codegen`             | Генерация DTO на основе OpenAPI-спецификации (`internal/dto/gen/types.gen.go`) |
+| `make codegen_install`     | Установка инструмента `oapi-codegen`                                           |
+| `make install-linter`      | Установка линтера `golangci-lint`                                              |
+| `make lint`                | Запуск статического анализа кода                                               |
+| `make lint-fix`            | Автоматическая фиксация некоторых проблем, найденных линтером                  |
 
 ---
 
