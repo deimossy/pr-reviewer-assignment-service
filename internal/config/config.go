@@ -3,7 +3,7 @@ package config
 import (
 	"time"
 
-	"github.com/caarlos0/env/v11"
+	env "github.com/caarlos0/env/v11"
 	"go.uber.org/zap"
 )
 
