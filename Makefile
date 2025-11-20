@@ -11,8 +11,14 @@ codegen: bin/codegen_install
 test:
 	go test -v ./...
 
-#bench:
-#	go test ./internal/services/example -bench=. -benchmem
+install-linter:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.59.1
+
+lint:
+	golangci-lint run
+
+lint-fix:
+	golangci-lint run --fix
 
 up:
 	docker compose up -d
